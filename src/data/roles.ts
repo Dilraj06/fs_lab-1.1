@@ -2,28 +2,28 @@ import type { Role } from "../types/Role";
 
 export const roles: Role[] = [
   {
-    firstName: "Jennifer",
-    lastName: "Martin",
+    firstName: "Brew",
+    lastName: "Moore",
     role: "Chief Executive Officer",
   },
   {
-    firstName: "David",
-    lastName: "Wilson",
+    firstName: "Dee",
+    lastName: "Martin",
     role: "Chief Financial Officer",
   },
   {
-    firstName: "Sarah",
-    lastName: "Thompson",
+    firstName: "Seew",
+    lastName: "Rizz",
     role: "Director of Operations",
   },
   {
-    firstName: "Michael",
-    lastName: "Brown",
+    firstName: "Simma",
+    lastName: "Richard",
     role: "Human Resources Manager",
   },
   {
-    firstName: "Emma",
-    lastName: "Taylor",
+    firstName: "Giggi",
+    lastName: "Hadid",
     role: "Information Technology Manager",
   },
 ];
