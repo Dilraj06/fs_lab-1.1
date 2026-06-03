@@ -198,3 +198,56 @@ footer{
 .employee-form button:hover {
   background: #1d4ed8;
 }
+
+.navbar {
+  background: #1e293b;
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.organization-page {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.organization-page h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #2563eb;
+}
+
+.organization-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.organization-card {
+  background: white;
+  padding: 18px 24px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.organization-card span {
+  font-size: 20px;
+}
+
+.organization-card strong {
+  font-size: 18px;
+  color: #1e293b;
+}
