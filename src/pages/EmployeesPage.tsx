@@ -18,31 +18,6 @@ export default function EmployeesPage() {
     0
   );
 
-  function addEmployee(
-    firstName: string,
-    lastName: string,
-    departmentName: string
-  ) {
-    const updatedDepartments = departments.map((department) => {
-      if (department.name === departmentName) {
-        return {
-          ...department,
-          employees: [
-            ...department.employees,
-            {
-              firstName,
-              lastName,
-            },
-          ],
-        };
-      }
-
-      return department;
-    });
-
-    setDepartments(updatedDepartments);
-  }
-
   return (
     <>
       <section className="intro">
@@ -74,7 +49,7 @@ export default function EmployeesPage() {
 
       <AddEmployeeForm
         departments={departments}
-        onAddEmployee={addEmployee}
+         onDepartmentsChange={setDepartments}
       />
     </>
   );
