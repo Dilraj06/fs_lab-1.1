@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@clerk/react";
 
 import { useFormInput } from "../hooks/useFormInput";
 import { roleService } from "../services/roleService";
@@ -8,16 +9,16 @@ interface AddRoleFormProps {
   onRolesChange: (roles: Role[]) => void;
 }
 
-export default function AddRoleForm({
-  onRolesChange,
-}: AddRoleFormProps) {
+export default function AddRoleForm({ onRolesChange }: AddRoleFormProps) {
+  const { getToken } = useAuth();
+
   const firstName = useFormInput("");
   const lastName = useFormInput("");
   const role = useFormInput("");
 
   const [formMessage, setFormMessage] = useState("");
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setFormMessage("");
@@ -42,13 +43,41 @@ export default function AddRoleForm({
       return;
     }
 
-    onRolesChange(result.roles);
+    try {
+      const token = await getToken();
 
-    firstName.reset("");
-    lastName.reset("");
-    role.reset("");
+if (!token) {
+  setFormMessage("Login session is still loading. Please refresh and try again.");
+  return;
+}
 
-    setFormMessage("Organization role added successfully.");
+      const response = await fetch("http://localhost:3001/roles", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: role.value,
+        }),
+      });
+
+      if (!response.ok) {
+        setFormMessage("You must be logged in to add an organization role.");
+        return;
+      }
+
+      onRolesChange(result.roles);
+
+      firstName.reset("");
+      lastName.reset("");
+      role.reset("");
+
+      setFormMessage("Organization role added successfully.");
+    } catch (error) {
+      console.error(error);
+      setFormMessage("Something went wrong while adding the role.");
+    }
   }
 
   return (
@@ -97,9 +126,7 @@ export default function AddRoleForm({
             placeholder="Enter role"
           />
 
-          {role.message && (
-            <p className="form-message">{role.message}</p>
-          )}
+          {role.message && <p className="form-message">{role.message}</p>}
         </div>
 
         {formMessage && <p className="success-message">{formMessage}</p>}

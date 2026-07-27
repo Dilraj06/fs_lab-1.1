@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Show, SignInButton } from "@clerk/react";
 
 import AddRoleForm from "../components/AddRoleForm";
 import { roleRepo } from "../repositories/roleRepo";
@@ -28,7 +29,22 @@ export default function OrganizationPage() {
         </div>
       </section>
 
-      <AddRoleForm onRolesChange={setRoles} />
+      <Show when="signed-in">
+        <AddRoleForm onRolesChange={setRoles} />
+      </Show>
+
+      <Show when="signed-out">
+        <section className="login-message">
+          <h3>Want to add a new role?</h3>
+          <p>Please log in to create new organization entries.</p>
+
+          <SignInButton mode="modal">
+            <button className="login-button" type="button">
+              Login to add role
+            </button>
+          </SignInButton>
+        </section>
+      </Show>
     </>
   );
 }

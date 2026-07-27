@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@clerk/react";
 
 import type { Department } from "../types/Employee";
 import { useFormInput } from "../hooks/useFormInput";
@@ -13,13 +14,15 @@ export default function AddEmployeeForm({
   departments,
   onDepartmentsChange,
 }: AddEmployeeFormProps) {
+  const { getToken } = useAuth();
+
   const firstName = useFormInput("");
   const lastName = useFormInput("");
   const departmentName = useFormInput(departments[0]?.name || "");
 
   const [formMessage, setFormMessage] = useState("");
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setFormMessage("");
@@ -45,13 +48,44 @@ export default function AddEmployeeForm({
       return;
     }
 
-    onDepartmentsChange(result.departments);
+    try {
+      const token = await getToken();
 
-    firstName.reset("");
-    lastName.reset("");
-    departmentName.reset(departments[0]?.name || "");
+if (!token) {
+  setFormMessage("Login session is still loading. Please refresh and try again.");
+  return;
+}
 
-    setFormMessage("Employee added successfully.");
+      const response = await fetch("http://localhost:3001/employees", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          firstName: firstName.value,
+          lastName: lastName.value,
+          department: departmentName.value,
+          roleId: 3,
+        }),
+      });
+
+      if (!response.ok) {
+        setFormMessage("You must be logged in to add an employee.");
+        return;
+      }
+
+      onDepartmentsChange(result.departments);
+
+      firstName.reset("");
+      lastName.reset("");
+      departmentName.reset(departments[0]?.name || "");
+
+      setFormMessage("Employee added successfully.");
+    } catch (error) {
+      console.error(error);
+      setFormMessage("Something went wrong while adding the employee.");
+    }
   }
 
   return (
