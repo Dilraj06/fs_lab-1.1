@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Show, SignInButton } from "@clerk/react";
+import { useQuery } from "@tanstack/react-query";
 
 import DepartmentCard from "../components/DepartmentCard";
 import AddEmployeeForm from "../components/AddEmployeeForm";
@@ -14,6 +15,16 @@ type ApiEmployee = {
   lastName: string;
   department: string;
 };
+
+async function fetchEmployees(): Promise<ApiEmployee[]> {
+  const response = await fetch("http://localhost:3001/employees");
+
+  if (!response.ok) {
+    throw new Error("Failed to load employees");
+  }
+
+  return response.json();
+}
 
 function groupEmployeesByDepartment(employees: ApiEmployee[]): Department[] {
   const groupedDepartments: Department[] = [];
@@ -44,31 +55,32 @@ function groupEmployeesByDepartment(employees: ApiEmployee[]): Department[] {
 export default function EmployeesPage() {
   const [searchText, setSearchText] = useState("");
 
-  const [departments, setDepartments] =
-    useState<Department[]>(startingDepartments);
+  const [localDepartments, setLocalDepartments] = useState<Department[] | null>(
+    null
+  );
 
-  useEffect(() => {
-    async function loadEmployees() {
-      try {
-        const response = await fetch("http://localhost:3001/employees");
+  const {
+  data: employees,
+  isLoading,
+  isError,
+  isFetching,
+  refetch,
+} = useQuery({
+  queryKey: ["employees"],
+  queryFn: fetchEmployees,
+});
 
-        if (!response.ok) {
-          return;
-        }
-
-        const employees: ApiEmployee[] = await response.json();
-        const groupedDepartments = groupEmployeesByDepartment(employees);
-
-        if (groupedDepartments.length > 0) {
-          setDepartments(groupedDepartments);
-        }
-      } catch (error) {
-        console.error(error);
-      }
+  const departments = useMemo(() => {
+    if (localDepartments) {
+      return localDepartments;
     }
 
-    loadEmployees();
-  }, []);
+    if (employees && employees.length > 0) {
+      return groupEmployeesByDepartment(employees);
+    }
+
+    return startingDepartments;
+  }, [employees, localDepartments]);
 
   const totalEmployees = departments.reduce(
     (total, department) => total + department.employees.length,
@@ -80,9 +92,30 @@ export default function EmployeesPage() {
       <section className="intro">
         <h2>Departments & Employees</h2>
 
+        {isLoading && <p className="total">Loading employees...</p>}
+
+        {isError && (
+          <p className="total">
+            Backend is not available, showing local employee data.
+          </p>
+        )}
+
         <p className="total">Total Employees: {totalEmployees}</p>
 
-        <input
+         <p className="total">
+           Data managed with TanStack Query
+            {isFetching ? " - refreshing..." : " - ready"}
+            </p>
+
+            <button
+             className="login-button"
+             type="button"
+             onClick={() => refetch()}
+             >
+              Refresh Data
+            </button>
+
+         <input
           type="text"
           placeholder="Search employees..."
           value={searchText}
@@ -103,7 +136,7 @@ export default function EmployeesPage() {
       <Show when="signed-in">
         <AddEmployeeForm
           departments={departments}
-          onDepartmentsChange={setDepartments}
+          onDepartmentsChange={setLocalDepartments}
         />
       </Show>
 
